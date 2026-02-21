@@ -1,6 +1,12 @@
 #include<iostream>
-#include<glad/glad.h>
+#include<glad/glad.h>//Primero se incluye glad.h para cargar las funciones de OpenGL antes de incluir GLFW, ya que GLFW depende de OpenGL para funcionar correctamente!!!!
 #include<GLFW/glfw3.h>
+
+// Funcion callback se llama cada vez que redimensiona la ventana
+void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+{
+	glViewport(0, 0, width, height); // Ajusta el viewport a las nuevas dimensiones de la ventana
+}
 
 int main()
 {
@@ -17,22 +23,29 @@ int main()
 		glfwTerminate(); //Termina glfw
 		return -1;
 	}
-	
-	glfwMakeContextCurrent(window); //Indca al programa que se quiere usar la ventana creada y le dice a GLFW que haga a la ventana parte del contexto actual de OpenGL
 
-	gladLoadGL();//Carga las funciones necesaruas para OpenGL
-	
-	glViewport(0, 0, 800, 800); //Indica a OpenGL el viewport (area de renderizado) desde la esquina inferior izquierda (0,0) hasta la esquina superior derecha (800,800) de la ventana. Esto asegura que todo lo que se renderice se ajuste al tamaño de la ventana creada
-	
-	//BACK BUFFER -> renderiza
-	glClearColor(0.07f, 0.13f, 0.17f, 1.0f );//Indica a OpenGL que se prepare para limpiar el color de un buffer y darle otro color (red, green, blue, alpha)
-	//FRONT BUFFER -> muestra
-	glClear(GL_COLOR_BUFFER_BIT); //Ejecuta el comando para el que se preparo anteriormente, especificado que se quiere aplicar en el buffer de color (GL_COLOR_BUFFER_BIT)
-	glfwSwapBuffers(window); //Intercambia ambos buffers para que el color deseado se muestre. Se muestra en el front buffer lo que renderizo el back buffer
+	glfwMakeContextCurrent(window); // Hace que la ventana sea el contexto actual
+
+	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) // Inicializa GLAD
+	{
+		std::cout << "Failed to initialize GLAD" << std::endl;
+		glfwDestroyWindow(window);
+		glfwTerminate();
+		return -1;
+	}
+
+	glViewport(0, 0, 800, 800); // Ajusta viewport inicial
+	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback); // Registra la función callback
 
 	while(!glfwWindowShouldClose(window)) //Indica a la ventana que no debe cerrarse a menos de que otra funcion se lo indique
 	{
-		glfwPollEvents(); //Procesa eventos como la aparicion dde la ventana, su redimensionamiento, etc. Si no se procesan, la ventana no respondera a los eventos
+		// Renderizado: limpiar color del buffer cada frame
+		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT);
+
+		// Intercambia buffers y procesa eventos
+		glfwSwapBuffers(window);
+		glfwPollEvents();
 	}
 	glfwDestroyWindow(window); //Destruye la ventana creada para liberar recursos
 	glfwTerminate();
