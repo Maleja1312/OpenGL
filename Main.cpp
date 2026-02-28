@@ -2,6 +2,7 @@
 #include<glad/glad.h>//Primero se incluye glad.h para cargar las funciones de OpenGL antes de incluir GLFW, ya que GLFW depende de OpenGL para funcionar correctamente!!!!
 #include<GLFW/glfw3.h>
 
+// Código fuente de los shaders
 const char* vertexShaderSource = "#version 330 core\n"
 	"layout (location = 0) in vec3 aPos;\n"
 	"void main()\n"
@@ -28,11 +29,11 @@ int main()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3); //Configura la version menor de OpenGL como la 3.3
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); //Configura el perfil de OpenGL como el core profile (no incluye funciones obsoletas) Si se usara compatibility profile se podrían usar dichas funciones obsoletas
 	
-	//triangulo equilatero con centro en el origen
+	//Certices de triangulo equilatero con centro en el origen
 	GLfloat vertices[] = {
-		-0.5f, -0.5f * float(sqrt(3))/3, 0.0f, // Abajo izquierda
-		 0.5f, -0.5f * float(sqrt(3)) / 3, 0.0f, // Abajo derecha
-		 0.0f,  0.5f * float(sqrt(3)) *2 / 3, 0.0f  // Arriba
+		-0.5f, -0.5f * float(sqrt(3))/3, 0.0f,//Abajo izquierda
+		 0.5f, -0.5f * float(sqrt(3)) / 3, 0.0f,//Abajo derecha
+		 0.0f,  0.5f * float(sqrt(3)) *2 / 3, 0.0f //Arriba
 	};
 
 	GLFWwindow* window = glfwCreateWindow(800, 800, "TutorialOpenGL", NULL, NULL); //El objeto tipo GLFWwindow llamado window se inicializa con la función glfwCreateWindow (ancho, alto, titulo, monitor, share)
@@ -58,40 +59,47 @@ int main()
 	glViewport(0, 0, 800, 800); // Ajusta viewport inicial
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback); // Registra la función callback
 
-	GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER); //Crea un shader de tipo vértice y devuelve su ID
+	//Shader de vértice: Se ejecuta una vez por vértice y convierte la posición 3D del vertice en una posicion 2D en la ventana
+	GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER); //Crea shader de vértice y devuelve su ID
 	glShaderSource(vertexShader, 1, &vertexShaderSource, NULL); //Asocia el código fuente del shader al shader creado
 	glCompileShader(vertexShader); //Compila el shader de vértice
 
-	GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER); //Crea un shader de tipo fragmento y devuelve su ID
+	//shader de fragmento: se ejecuta una vezz por cada fragmento/pixel generado por el rasterizador y determina el color final del pixel
+	GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER); //Crea shader de fragmento y devuelve su ID
 	glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL); //Asocia el código fuente del shader al shader creado
 	glCompileShader(fragmentShader); //Compila el shader de fragmento
 
+	//Programa de shader : Objeto que contiene shaders enlazados. Versión linkeada final de todos los shaders usados que permite renderizar objetos.
 	GLuint shaderProgram = glCreateProgram(); //Crea un programa de shader y devuelve su ID	
 	glAttachShader(shaderProgram, vertexShader); //Adjunta el shader de vértice al programa
 	glAttachShader(shaderProgram, fragmentShader); //Adjunta el shader de fragmento al programa
 	glLinkProgram(shaderProgram); //Enlaza el programa de shader
 
-	glDeleteShader(vertexShader); //Elimina el shader de vértice ya que no es necesario después de enlazar el programa
-	glDeleteShader(fragmentShader); //Elimina el shader de fragmento ya que no es necesario después de enlazar el programa
+	glDeleteShader(vertexShader); //Elimina shader de vértice, no es necesario después de enlazar el programa
+	glDeleteShader(fragmentShader); //Elimina shader de fragmento, ''
+
 
 
 	GLuint VAO, VBO; //Declara variables para el Vertex Buffer Object (VBO) y el Vertex Array Object (VAO)
+	//Vertex Buffer: Buffer de memoria en GPU que almacena informacion de vertices
+	//Vertex Array Object: Objeto que almacena la configuración de atributos de vértice y el VBO asociado, para renderizar objetos de manera eficiente al enlazar el VAO en vez de configurar los atributos cada vez
 
 	glGenVertexArrays(1, &VAO); //Genera un array de vértices y almacena su ID en VAO. Se genera SIEMPRE antes que el VBO
 	glGenBuffers(1, &VBO); //Genera un buffer y almacena su ID en VBO
-	glBindBuffer(GL_ARRAY_BUFFER, VBO); //Enlaza el buffer como un buffer de array
-
-	glBindVertexArray(VAO); //Enlaza el VAO para almacenar la configuración de los atributos de vértice
+	
+	glBindVertexArray(VAO); //Enlaza VAO para almacenar la configuración de los atributos de vértice para que cualquier configuración de vértices se guarde en VAO
 
 	glBindBuffer(GL_ARRAY_BUFFER, VBO); //Enlaza el buffer de vértices para configurar los atributos de vértice
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW); //Copia los datos de los vértices al buffer
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW); //Copia datos del array de vertices al buffer de vertices en la GPU (en VBO). GL_STATIC_DRAW indica que los datos no cambiarán o cambiarán muy poco
 
-	//Vertex array object
+	//Vertex array object: Configura los atributos de vértice para que OpenGL sepa cómo interpretar los datos del buffer de vértices
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0); //Configura el atributo de vértice para la posición (location = 0 en el shader)
-	glEnableVertexAttribArray(0); //Habilita el atributo de vértice para la posición
+	//glVertexAttribPointer(location, size, type, normalized, stride, pointer)
 
-	glBindBuffer(GL_ARRAY_BUFFER, 0); //Desenlaza el buffer de vértices
-	glBindVertexArray(0); //Desenlaza el VAO
+	glEnableVertexAttribArray(0); //Habilita el atributo de vértice para la posición (le dice a OpenGL que use el atributo de vértice en location = 0 para renderizar)
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0); //Desenlaza el buffer de vértices (VBO) para evitar modificaciones accidentales
+	glBindVertexArray(0); //Desenlaza el VAO para evitar modificaciones accidentales a la configuración de los atributos de vértice
 
 	while(!glfwWindowShouldClose(window)) //Indica a la ventana que no debe cerrarse a menos de que otra funcion se lo indique
 	{
@@ -100,19 +108,19 @@ int main()
 		glClear(GL_COLOR_BUFFER_BIT);
 		glUseProgram(shaderProgram); //Usa el programa de shader para renderizar
 		glBindVertexArray(VAO); //Enlaza el VAO para usar la configuración de los atributos de vértice
-		glDrawArrays(GL_TRIANGLES, 0, 3); //Dibuja el triángulo usando los vértices definidos en el VBO
+		glDrawArrays(GL_TRIANGLES, 0, 3); //Dibuja el triángulo usando los vértices definidos en el VBO 
 
 		// Intercambia buffers y procesa eventos
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
 
-	glDeleteVertexArrays(1, &VAO); //Elimina el VAO para liberar recursos
-	glDeleteBuffers(1, &VBO); //Elimina el VBO para liberar recursos
-	glDeleteProgram(shaderProgram); //Elimina el programa de shader para liberar recursos
+	//Para liberar recursos, se eliminan los objetos de OpenGL creados (VAO, VBO, shader program), se destruye la ventana creada y termina GLFW para liberar recursos
+	glDeleteVertexArrays(1, &VAO);
+	glDeleteBuffers(1, &VBO);
+	glDeleteProgram(shaderProgram);
 
-
-	glfwDestroyWindow(window); //Destruye la ventana creada para liberar recursos
+	glfwDestroyWindow(window);
 	glfwTerminate();
 	return 0;
 }
