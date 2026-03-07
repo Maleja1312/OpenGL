@@ -8,6 +8,11 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
 	glViewport(0, 0, width, height); // Ajusta el viewport a las nuevas dimensiones de la ventana
 }
+void processInput(GLFWwindow* window)
+{
+	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+		glfwSetWindowShouldClose(window, true);
+}
 
 int main()
 {
@@ -16,13 +21,6 @@ int main()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3); //Configura la version menor de OpenGL como la 3.3
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); //Configura el perfil de OpenGL como el core profile (no incluye funciones obsoletas) Si se usara compatibility profile se podrían usar dichas funciones obsoletas
 	
-	//Certices de triangulo equilatero con centro en el origen
-	GLfloat vertices[] = {
-		-0.5f, -0.5f * float(sqrt(3))/3, 0.0f,//Abajo izquierda
-		 0.5f, -0.5f * float(sqrt(3)) / 3, 0.0f,//Abajo derecha
-		 0.0f,  0.5f * float(sqrt(3)) *2 / 3, 0.0f //Arriba
-	};
-
 	GLFWwindow* window = glfwCreateWindow(800, 800, "TutorialOpenGL", NULL, NULL); //El objeto tipo GLFWwindow llamado window se inicializa con la función glfwCreateWindow (ancho, alto, titulo, monitor, share)
 	//Se crea una ventana de 800x600 pc con título "TutorialOpenGL"
 	//Monitor y share se establecen en NULL, es decir no se especifica un monitor para pantalla completa ni se comparte recursos con otra ventana
@@ -65,9 +63,14 @@ int main()
 	glDeleteShader(vertexShader); //Elimina shader de vértice, no es necesario después de enlazar el programa
 	glDeleteShader(fragmentShader); //Elimina shader de fragmento, ''
 
+	//Vertices de triangulo equilatero con centro en el origen
+	GLfloat vertices[] = {
+		-0.5f, -0.5f * float(sqrt(3)) / 3, 0.0f, 1.0f, 0.0f, 0.0f, //Abajo izquierda
+		 0.5f, -0.5f * float(sqrt(3)) / 3, 0.0f, 0.0f, 1.0f, 0.0f, //Abajo derecha
+		 0.0f,  0.5f * float(sqrt(3)) * 2 / 3, 0.0f, 0.0f, 0.0f, 1.0f  //Arriba
+	};
 
-
-	GLuint VAO, VBO; //Declara variables para el Vertex Buffer Object (VBO) y el Vertex Array Object (VAO)
+	unsigned int VAO, VBO; //Declara variables para el Vertex Buffer Object (VBO) y el Vertex Array Object (VAO)
 	//Vertex Buffer: Buffer de memoria en GPU que almacena informacion de vertices
 	//Vertex Array Object: Objeto que almacena la configuración de atributos de vértice y el VBO asociado, para renderizar objetos de manera eficiente al enlazar el VAO en vez de configurar los atributos cada vez
 
@@ -80,26 +83,25 @@ int main()
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW); //Copia datos del array de vertices al buffer de vertices en la GPU (en VBO). GL_STATIC_DRAW indica que los datos no cambiarán o cambiarán muy poco
 
 	//Vertex array object: Configura los atributos de vértice para que OpenGL sepa cómo interpretar los datos del buffer de vértices
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0); //Configura el atributo de vértice para la posición (location = 0 en el shader)
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0); //Configura el atributo de vértice para la posición (location = 0 en el shader)
 	//glVertexAttribPointer(location, size, type, normalized, stride, pointer)
 
 	glEnableVertexAttribArray(0); //Habilita el atributo de vértice para la posición (le dice a OpenGL que use el atributo de vértice en location = 0 para renderizar)
+
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));//1 configura el atributo de vértice para el color (location = 1 en el shader). 3 configura el tamaño del atributo (vec3), 6 * sizeof(float) es el stride (tamaño total de un vértice en bytes), y (void*)(3 * sizeof(float)) es el offset (desplazamiento en bytes desde el inicio del vértice hasta el atributo de color)
+	glEnableVertexAttribArray(1);
+
+	glUseProgram(shaderProgram);//Usa el programa de shader para renderizar
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0); //Desenlaza el buffer de vértices (VBO) para evitar modificaciones accidentales
 	glBindVertexArray(0); //Desenlaza el VAO para evitar modificaciones accidentales a la configuración de los atributos de vértice
 
 	while(!glfwWindowShouldClose(window)) //Indica a la ventana que no debe cerrarse a menos de que otra funcion se lo indique
 	{
-
+		processInput(window);
 		// Renderizado: limpiar color del buffer cada frame
 		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
-		glUseProgram(shaderProgram); //Usa el programa de shader para renderizar
-
-		float timeValue = glfwGetTime();
-		float greenValue = sin(timeValue) / 2.0f + 0.5f;
-		int vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");
-		glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
 
 		glBindVertexArray(VAO); //Enlaza el VAO para usar la configuración de los atributos de vértice
 		glDrawArrays(GL_TRIANGLES, 0, 3); //Dibuja el triángulo usando los vértices definidos en el VBO 
