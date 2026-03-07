@@ -51,7 +51,7 @@ int main()
 	glShaderSource(vertexShader, 1, &vertexShaderSource, NULL); //Asocia el código fuente del shader al shader creado
 	glCompileShader(vertexShader); //Compila el shader de vértice
 
-	//shader de fragmento: se ejecuta una vezz por cada fragmento/pixel generado por el rasterizador y determina el color final del pixel
+	//shader de fragmento: se ejecuta una vez por cada fragmento/pixel generado por el rasterizador y determina el color final del pixel
 	GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER); //Crea shader de fragmento y devuelve su ID
 	glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL); //Asocia el código fuente del shader al shader creado
 	glCompileShader(fragmentShader); //Compila el shader de fragmento
@@ -90,10 +90,17 @@ int main()
 
 	while(!glfwWindowShouldClose(window)) //Indica a la ventana que no debe cerrarse a menos de que otra funcion se lo indique
 	{
+
 		// Renderizado: limpiar color del buffer cada frame
 		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 		glUseProgram(shaderProgram); //Usa el programa de shader para renderizar
+
+		float timeValue = glfwGetTime();
+		float greenValue = sin(timeValue) / 2.0f + 0.5f;
+		int vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");
+		glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
+
 		glBindVertexArray(VAO); //Enlaza el VAO para usar la configuración de los atributos de vértice
 		glDrawArrays(GL_TRIANGLES, 0, 3); //Dibuja el triángulo usando los vértices definidos en el VBO 
 
