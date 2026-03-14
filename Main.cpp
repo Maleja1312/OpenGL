@@ -1,7 +1,12 @@
 #include<iostream>
 #include<glad/glad.h>//Primero se incluye glad.h para cargar las funciones de OpenGL antes de incluir GLFW, ya que GLFW depende de OpenGL para funcionar correctamente!!!!
 #include<GLFW/glfw3.h>
-#include "shader_sources.h" //Archivo con el código fuente de los shaders
+
+#include"shaderClass.h" //Incluye la clase Shader
+#include"VAO.h"//Incluye la clase VAO
+#include"VBO.h"//Incluye la clase VBO
+#include"EBO.h"//Incluye la clase EBO
+
 
 // Funcion callback se llama cada vez que redimensiona la ventana
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
@@ -13,6 +18,8 @@ void processInput(GLFWwindow* window)
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
 }
+
+
 
 int main()
 {
@@ -44,25 +51,6 @@ int main()
 	glViewport(0, 0, 800, 800); // Ajusta viewport inicial
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback); // Registra la función callback
 
-	//Shader de vértice: Se ejecuta una vez por vértice y convierte la posición 3D del vertice en una posicion 2D en la ventana
-	GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER); //Crea shader de vértice y devuelve su ID
-	glShaderSource(vertexShader, 1, &vertexShaderSource, NULL); //Asocia el código fuente del shader al shader creado
-	glCompileShader(vertexShader); //Compila el shader de vértice
-
-	//shader de fragmento: se ejecuta una vez por cada fragmento/pixel generado por el rasterizador y determina el color final del pixel
-	GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER); //Crea shader de fragmento y devuelve su ID
-	glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL); //Asocia el código fuente del shader al shader creado
-	glCompileShader(fragmentShader); //Compila el shader de fragmento
-
-	//Programa de shader : Objeto que contiene shaders enlazados. Versión linkeada final de todos los shaders usados que permite renderizar objetos.
-	GLuint shaderProgram = glCreateProgram(); //Crea un programa de shader y devuelve su ID	
-	glAttachShader(shaderProgram, vertexShader); //Adjunta el shader de vértice al programa
-	glAttachShader(shaderProgram, fragmentShader); //Adjunta el shader de fragmento al programa
-	glLinkProgram(shaderProgram); //Enlaza el programa de shader
-
-	glDeleteShader(vertexShader); //Elimina shader de vértice, no es necesario después de enlazar el programa
-	glDeleteShader(fragmentShader); //Elimina shader de fragmento, ''
-
 	//Vertices de triangulo equilatero con centro en el origen
 	GLfloat vertices[] = {
 		-0.5f, -0.5f * float(sqrt(3)) / 3, 0.0f, 1.0f, 0.0f, 0.0f, //Abajo izquierda
@@ -79,36 +67,26 @@ int main()
 		5, 4, 1 //Triangulo superior
 	};
 
-	unsigned int VAO, VBO, EBO; //Declara variables para el Vertex Buffer Object (VBO) y el Vertex Array Object (VAO)
-	//Vertex Buffer: Buffer de memoria en GPU que almacena informacion de vertices
-	//Vertex Array Object: Objeto que almacena la configuración de atributos de vértice y el VBO asociado, para renderizar objetos de manera eficiente al enlazar el VAO en vez de configurar los atributos cada vez
-
-	glGenVertexArrays(1, &VAO); //Genera un array de vértices y almacena su ID en VAO. Se genera SIEMPRE antes que el VBO
-	glGenBuffers(1, &VBO); //Genera un buffer y almacena su ID en VBO
-	glGenBuffers(1, &EBO); //Genera un buffer para los indices y almacena su ID en EBO
+	Shader shaderProgram("default.vert", "default.frag"); //Crea un objeto de la clase Shader llamado shaderProgram, que compila y enlaza los shaders "default.vert" y "default.frag"
 	
-	glBindVertexArray(VAO); //Enlaza VAO para almacenar la configuración de los atributos de vértice para que cualquier configuración de vértices se guarde en VAO
+	VAO VAO1; //Crea un objeto de la clase VAO llamado VAO1
+	VAO1.Bind(); //Enlaza el VAO para usarlo
 
-	glBindBuffer(GL_ARRAY_BUFFER, VBO); //Enlaza el buffer de vértices para configurar los atributos de vértice
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW); //Copia datos del array de vertices al buffer de vertices en la GPU (en VBO). GL_STATIC_DRAW indica que los datos no cambiarán o cambiarán muy poco
+	VBO VBO1(vertices, sizeof(vertices)); //Crea un objeto de la clase VBO llamado VBO1, que carga los datos de vértice definidos en el arreglo vertices
+	EBO EBO1(indices, sizeof(indices)); //Crea un objeto de la clase EBO llamado EBO1, que carga los datos de índice definidos en el arreglo indices
+	
+    shaderProgram.Activate(); //Activa el shader program para usarlo en el renderizado
 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO); //Enlaza el buffer de índices para configurar los atributos de vértice
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW); //Copia datos del array de índices al buffer de índices en la GPU (en EBO). GL_STATIC_DRAW indica que los datos no cambiarán o cambiarán muy poco
-
-	//Vertex array object: Configura los atributos de vértice para que OpenGL sepa cómo interpretar los datos del buffer de vértices
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0); //Configura el atributo de vértice para la posición (location = 0 en el shader)
-	//glVertexAttribPointer(location, size, type, normalized, stride, pointer)
-
-	glEnableVertexAttribArray(0); //Habilita el atributo de vértice para la posición (le dice a OpenGL que use el atributo de vértice en location = 0 para renderizar)
-
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));//1 configura el atributo de vértice para el color (location = 1 en el shader). 3 configura el tamaño del atributo (vec3), 6 * sizeof(float) es el stride (tamaño total de un vértice en bytes), y (void*)(3 * sizeof(float)) es el offset (desplazamiento en bytes desde el inicio del vértice hasta el atributo de color)
-	glEnableVertexAttribArray(1);
-
-	glUseProgram(shaderProgram);//Usa el programa de shader para renderizar
-
-	glBindBuffer(GL_ARRAY_BUFFER, 0); //Desenlaza el buffer de vértices (VBO) para evitar modificaciones accidentales
-	glBindVertexArray(0); //Desenlaza el VAO para evitar modificaciones accidentales a la configuración de los atributos de vértice
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); //Desenlaza el buffer de índices (EBO) para evitar modificaciones accidentales. SIEMPRE despues de desenlazar el VAO, ya que el EBO está asociado al VAO
+    // Configurar atributos manualmente: posición (location = 0) y color (location = 1)
+    // Cada vértice tiene 6 floats: 3 para posición, 3 para color
+    VBO1.Bind();
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+    // No desenlazamos el EBO aquí: debe permanecer ligado al VAO para glDrawElements
+    VAO1.Unbind(); //Desenlaza el VAO para evitar modificaciones accidentales
+    VBO1.Unbind(); //Desenlaza el VBO
 
 	while(!glfwWindowShouldClose(window)) //Indica a la ventana que no debe cerrarse a menos de que otra funcion se lo indique
 	{
@@ -117,7 +95,9 @@ int main()
 		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		glBindVertexArray(VAO); //Enlaza el VAO para usar la configuración de los atributos de vértice
+		
+
+		VAO1.Bind(); //Enlaza el VAO para usarlo en el renderizado
 		glDrawElements(GL_TRIANGLES, 9, GL_UNSIGNED_INT, 0); //Dibuja el triángulo usando los vértices definidos en el VBO 
 
 		// Intercambia buffers y procesa eventos
@@ -126,10 +106,10 @@ int main()
 	}
 
 	//Para liberar recursos, se eliminan los objetos de OpenGL creados (VAO, VBO, shader program), se destruye la ventana creada y termina GLFW para liberar recursos
-	glDeleteVertexArrays(1, &VAO);
-	glDeleteBuffers(1, &VBO);
-	glDeleteBuffers(1, &EBO);
-	glDeleteProgram(shaderProgram);
+	VAO1.Delete();
+	VBO1.Delete();
+	EBO1.Delete();
+	shaderProgram.Delete();
 
 	glfwDestroyWindow(window);
 	glfwTerminate();
