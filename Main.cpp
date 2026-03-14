@@ -1,11 +1,3 @@
-/* Plan (pseudocódigo, detallado):
-- Detectar error: faltan comas entre grupos de 6 floats en el array 'vertices', causando errores de sintaxis.
-- Arreglar: asegurar que cada vértice (6 floats: vec3 posición + vec3 color) termine con una coma en el array.
-- Mantener estructura y lógica original del programa.
-- No modificar el resto del código salvo añadir comas faltantes.
-- Resultado: el compilador deja de reportar 'se esperaba ','' y 'error de sintaxis: constante'.
-*/
-
 #include<iostream>
 #include<glad/glad.h>//Primero se incluye glad.h para cargar las funciones de OpenGL antes de incluir GLFW, ya que GLFW depende de OpenGL para funcionar correctamente!!!!
 #include<GLFW/glfw3.h>
