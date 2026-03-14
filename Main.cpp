@@ -1,3 +1,11 @@
+/* Plan (pseudocódigo, detallado):
+- Detectar error: faltan comas entre grupos de 6 floats en el array 'vertices', causando errores de sintaxis.
+- Arreglar: asegurar que cada vértice (6 floats: vec3 posición + vec3 color) termine con una coma en el array.
+- Mantener estructura y lógica original del programa.
+- No modificar el resto del código salvo añadir comas faltantes.
+- Resultado: el compilador deja de reportar 'se esperaba ','' y 'error de sintaxis: constante'.
+*/
+
 #include<iostream>
 #include<glad/glad.h>//Primero se incluye glad.h para cargar las funciones de OpenGL antes de incluir GLFW, ya que GLFW depende de OpenGL para funcionar correctamente!!!!
 #include<GLFW/glfw3.h>
@@ -67,20 +75,33 @@ int main()
 	GLfloat vertices[] = {
 		-0.5f, -0.5f * float(sqrt(3)) / 3, 0.0f, 1.0f, 0.0f, 0.0f, //Abajo izquierda
 		 0.5f, -0.5f * float(sqrt(3)) / 3, 0.0f, 0.0f, 1.0f, 0.0f, //Abajo derecha
-		 0.0f,  0.5f * float(sqrt(3)) * 2 / 3, 0.0f, 0.0f, 0.0f, 1.0f  //Arriba
+		 0.0f,  0.5f * float(sqrt(3)) * 2 / 3, 0.0f, 0.0f, 0.0f, 1.0f, //Arriba
+		-0.5f / 2, 0.5f * float(sqrt(3)) / 6, 0.0f, 1.0f, 0.0f, 0.0f, //Interior izquierda
+		0.5f / 2, 0.5f * float(sqrt(3)) / 6, 0.0f, 0.0f, 1.0f, 0.0f, //Interior derecha
+		0.0f, -0.5f * float(sqrt(3)) / 3, 0.0f, 0.0f, 0.0f, 1.0f //Interior abajo
 	};
 
-	unsigned int VAO, VBO; //Declara variables para el Vertex Buffer Object (VBO) y el Vertex Array Object (VAO)
+	GLuint indices[] = {
+		0, 3, 5, //Triangulo inferior izquierdo
+		3, 2, 4, //Triangulo inferior derecho
+		5, 4, 1 //Triangulo superior
+	};
+
+	unsigned int VAO, VBO, EBO; //Declara variables para el Vertex Buffer Object (VBO) y el Vertex Array Object (VAO)
 	//Vertex Buffer: Buffer de memoria en GPU que almacena informacion de vertices
 	//Vertex Array Object: Objeto que almacena la configuración de atributos de vértice y el VBO asociado, para renderizar objetos de manera eficiente al enlazar el VAO en vez de configurar los atributos cada vez
 
 	glGenVertexArrays(1, &VAO); //Genera un array de vértices y almacena su ID en VAO. Se genera SIEMPRE antes que el VBO
 	glGenBuffers(1, &VBO); //Genera un buffer y almacena su ID en VBO
+	glGenBuffers(1, &EBO); //Genera un buffer para los indices y almacena su ID en EBO
 	
 	glBindVertexArray(VAO); //Enlaza VAO para almacenar la configuración de los atributos de vértice para que cualquier configuración de vértices se guarde en VAO
 
 	glBindBuffer(GL_ARRAY_BUFFER, VBO); //Enlaza el buffer de vértices para configurar los atributos de vértice
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW); //Copia datos del array de vertices al buffer de vertices en la GPU (en VBO). GL_STATIC_DRAW indica que los datos no cambiarán o cambiarán muy poco
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO); //Enlaza el buffer de índices para configurar los atributos de vértice
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW); //Copia datos del array de índices al buffer de índices en la GPU (en EBO). GL_STATIC_DRAW indica que los datos no cambiarán o cambiarán muy poco
 
 	//Vertex array object: Configura los atributos de vértice para que OpenGL sepa cómo interpretar los datos del buffer de vértices
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0); //Configura el atributo de vértice para la posición (location = 0 en el shader)
@@ -95,6 +116,7 @@ int main()
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0); //Desenlaza el buffer de vértices (VBO) para evitar modificaciones accidentales
 	glBindVertexArray(0); //Desenlaza el VAO para evitar modificaciones accidentales a la configuración de los atributos de vértice
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); //Desenlaza el buffer de índices (EBO) para evitar modificaciones accidentales. SIEMPRE despues de desenlazar el VAO, ya que el EBO está asociado al VAO
 
 	while(!glfwWindowShouldClose(window)) //Indica a la ventana que no debe cerrarse a menos de que otra funcion se lo indique
 	{
@@ -104,7 +126,7 @@ int main()
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		glBindVertexArray(VAO); //Enlaza el VAO para usar la configuración de los atributos de vértice
-		glDrawArrays(GL_TRIANGLES, 0, 3); //Dibuja el triángulo usando los vértices definidos en el VBO 
+		glDrawElements(GL_TRIANGLES, 9, GL_UNSIGNED_INT, 0); //Dibuja el triángulo usando los vértices definidos en el VBO 
 
 		// Intercambia buffers y procesa eventos
 		glfwSwapBuffers(window);
@@ -114,6 +136,7 @@ int main()
 	//Para liberar recursos, se eliminan los objetos de OpenGL creados (VAO, VBO, shader program), se destruye la ventana creada y termina GLFW para liberar recursos
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO);
+	glDeleteBuffers(1, &EBO);
 	glDeleteProgram(shaderProgram);
 
 	glfwDestroyWindow(window);
