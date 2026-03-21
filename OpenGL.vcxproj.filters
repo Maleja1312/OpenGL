@@ -16,6 +16,9 @@
     <Filter Include="Archivos de origen\Shaders">
       <UniqueIdentifier>{25cf31f7-d998-4d64-af46-ee02ff1ad221}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Archivos de origen\Textures">
+      <UniqueIdentifier>{53bb2018-2ff4-4b48-8944-ba73cbf074b9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="glad.c">
@@ -36,12 +39,20 @@
     <ClCompile Include="VAO.cpp">
       <Filter>Archivos de recursos</Filter>
     </ClCompile>
+    <ClCompile Include="stb.cpp">
+      <Filter>Archivos de recursos</Filter>
+    </ClCompile>
+    <ClCompile Include="stb_image_impl.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="default.vert">
       <Filter>Archivos de origen\Shaders</Filter>
     </None>
-    <None Include="default.frag" />
+    <None Include="default.frag">
+      <Filter>Archivos de origen\Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="shaderClass.h">
@@ -56,5 +67,10 @@
     <ClInclude Include="VAO.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\..\..\Downloads\descarga.jpg">
+      <Filter>Archivos de origen\Textures</Filter>
+    </Image>
   </ItemGroup>
 </Project>

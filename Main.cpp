@@ -1,6 +1,7 @@
 #include<iostream>
 #include<glad/glad.h>//Primero se incluye glad.h para cargar las funciones de OpenGL antes de incluir GLFW, ya que GLFW depende de OpenGL para funcionar correctamente!!!!
 #include<GLFW/glfw3.h>
+#include<stb/stb_image.h>
 
 #include"shaderClass.h" //Incluye la clase Shader
 #include"VAO.h"//Incluye la clase VAO
@@ -52,19 +53,17 @@ int main()
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback); // Registra la función callback
 
 	//Vertices de triangulo equilatero con centro en el origen
-	GLfloat vertices[] = {
-		-0.5f, -0.5f * float(sqrt(3)) / 3, 0.0f, 1.0f, 0.0f, 0.0f, //Abajo izquierda
-		 0.5f, -0.5f * float(sqrt(3)) / 3, 0.0f, 0.0f, 1.0f, 0.0f, //Abajo derecha
-		 0.0f,  0.5f * float(sqrt(3)) * 2 / 3, 0.0f, 0.0f, 0.0f, 1.0f, //Arriba
-		-0.5f / 2, 0.5f * float(sqrt(3)) / 6, 0.0f, 1.0f, 0.0f, 0.0f, //Interior izquierda
-		0.5f / 2, 0.5f * float(sqrt(3)) / 6, 0.0f, 0.0f, 1.0f, 0.0f, //Interior derecha
-		0.0f, -0.5f * float(sqrt(3)) / 3, 0.0f, 0.0f, 0.0f, 1.0f //Interior abajo
+	GLfloat vertices[] =
+	{	//Posicion            //Color                     //Texcoords 
+		-0.5f, -0.5f, 0.0f,   1.000f, 0.714f, 0.757f,     0.0f, 0.0f, // Abajo izquierda (rosado) 
+		-0.5f,  0.5f, 0.0f,   1.000f, 0.788f, 0.851f,     0.0f, 1.0f, // Arriba izquierda (intermedio)  
+		0.5f,  0.5f, 0.0f,   0.847f, 0.706f, 0.902f,     1.0f, 1.0f, // Arriba derecha (violeta)  
+		0.5f, -0.5f, 0.0f,   0.902f, 0.902f, 0.980f,     1.0f, 0.0f  // Abajo derecha (lavanda)
 	};
 
 	GLuint indices[] = {
-		0, 3, 5, //Triangulo inferior izquierdo
-		3, 2, 4, //Triangulo inferior derecho
-		5, 4, 1 //Triangulo superior
+		0, 2, 1 , //Triangulo superior
+		0, 3, 2	  //Triangulo inferior
 	};
 
 	Shader shaderProgram("default.vert", "default.frag"); //Crea un objeto de la clase Shader llamado shaderProgram, que compila y enlaza los shaders "default.vert" y "default.frag"
@@ -77,16 +76,48 @@ int main()
 	
     shaderProgram.Activate(); //Activa el shader program para usarlo en el renderizado
 
-    // Configurar atributos manualmente: posición (location = 0) y color (location = 1)
-    // Cada vértice tiene 6 floats: 3 para posición, 3 para color
+    // Configurar atributos manualmente: posición (location = 0), color (location = 1) y texcoord (location = 2)
+    // Cada vértice tiene 8 floats: 3 posición, 3 color, 2 texcoords
     VBO1.Bind();
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    GLsizei stride = 8 * sizeof(float);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (void*)0);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, stride, (void*)(6 * sizeof(float)));//
+    glEnableVertexAttribArray(2);
     // No desenlazamos el EBO aquí: debe permanecer ligado al VAO para glDrawElements
     VAO1.Unbind(); //Desenlaza el VAO para evitar modificaciones accidentales
     VBO1.Unbind(); //Desenlaza el VBO
+
+	//Texturas
+
+    int widthImg, heightImg, numColCh;
+    // Flip vertically so texture coords match OpenGL convention (optional depending on image)
+    stbi_set_flip_vertically_on_load(true);
+    unsigned char* bytes = stbi_load("descarga.jpg", &widthImg, &heightImg, &numColCh, 0); //Carga la imagen "descarga.jpg"
+
+	GLuint texture;
+	glGenTextures(1, &texture); //Genera un ID para la textura
+	glActiveTexture(GL_TEXTURE0); //Activa la unidad de textura 0
+	glBindTexture(GL_TEXTURE_2D, texture); //Enlaza la textura como una textura 2D
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST); //Configura el modo de envoltura en S (horizontal) como repetición
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST); //Configura el modo de envoltura en T (vertical) como repetición
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); //Configura el modo de filtrado para reducción (minificación) como nearest (vecino más cercano). S significa la coordenada horizontal de la textura (x)
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT); //Configura el modo de filtrado para ampliación (magnificación) como nearest (vecino más cercano). T significa la coordenada vertical de la textura (y)
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, widthImg, heightImg, 0, GL_RGB, GL_UNSIGNED_BYTE, bytes); //Carga la imagen en la textura usando glTexImage2D. Especifica el formato de la imagen (RGB) y el tipo de datos (unsigned byte)
+	glGenerateMipmap(GL_TEXTURE_2D); //Genera mipmaps para la textura, lo que mejora la calidad visual al reducir la textura a tamaños más pequeños
+
+
+	stbi_image_free(bytes); //Libera la memoria de la imagen cargada
+	glBindTexture(GL_TEXTURE_2D, 0); //Desenlaza la textura
+
+    GLuint tex0Uni = glGetUniformLocation(shaderProgram.ID, "tex0"); //Obtiene la ubicación del uniform "tex0" en el shader program
+    shaderProgram.Activate(); //Activa el shader program para usarlo
+    glUniform1i(tex0Uni, 0); //Asigna la unidad de textura 0 al sampler (usar glUniform1i)
 
 	while(!glfwWindowShouldClose(window)) //Indica a la ventana que no debe cerrarse a menos de que otra funcion se lo indique
 	{
@@ -95,10 +126,10 @@ int main()
 		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		
+		glBindTexture(GL_TEXTURE_2D, texture); //Enlaza la textura como una textura 2D
 
 		VAO1.Bind(); //Enlaza el VAO para usarlo en el renderizado
-		glDrawElements(GL_TRIANGLES, 9, GL_UNSIGNED_INT, 0); //Dibuja el triángulo usando los vértices definidos en el VBO 
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0); //Dibuja el triángulo usando los vértices definidos en el VBO 
 
 		// Intercambia buffers y procesa eventos
 		glfwSwapBuffers(window);
@@ -109,6 +140,7 @@ int main()
 	VAO1.Delete();
 	VBO1.Delete();
 	EBO1.Delete();
+	glDeleteTextures(1, &texture);
 	shaderProgram.Delete();
 
 	glfwDestroyWindow(window);
