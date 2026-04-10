@@ -52,16 +52,55 @@ int main()
 		return -1;
 	}
 
+	glEnable(GL_DEPTH_TEST);
+
 	glViewport(0, 0, 800, 800); // Ajusta viewport inicial
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback); // Registra la función callback
 
 	//Vertices de triangulo equilatero con centro en el origen
-	GLfloat vertices[] =
-	{ 	//Posicion            //Color                     //Texcoords 
-		-0.5f, -0.5f, 0.0f,   1.000f, 0.714f, 0.757f,     0.0f, 0.0f, // Abajo izquierda (rosado) 
-		-0.5f,  0.5f, 0.0f,   1.000f, 0.788f, 0.851f,     0.0f, 1.0f, // Arriba izquierda (intermedio)  
-		0.5f,  0.5f, 0.0f,   0.847f, 0.706f, 0.902f,     1.0f, 1.0f, // Arriba derecha (violeta)  
-		0.5f, -0.5f, 0.0f,   0.902f, 0.902f, 0.980f,     1.0f, 0.0f  // Abajo derecha (lavanda)
+	float vertices[] =
+	{ 	//Posicion            //Color				   //Texcoords 
+		-0.5f, -0.5f, -0.5f,  1.000f, 0.788f, 0.851f,  0.0f, 0.0f,	//cara trasera
+		 0.5f, -0.5f, -0.5f,  1.000f, 0.788f, 0.851f,  1.0f, 0.0f,
+		 0.5f,  0.5f, -0.5f,  0.847f, 0.706f, 0.902f,  1.0f, 1.0f,
+		 0.5f,  0.5f, -0.5f,  0.847f, 0.706f, 0.902f,  1.0f, 1.0f,
+		-0.5f,  0.5f, -0.5f,  1.000f, 0.714f, 0.757f,  0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  1.000f, 0.788f, 0.851f,  0.0f, 0.0f,
+
+		-0.5f, -0.5f,  0.5f,  1.000f, 0.788f, 0.851f,  0.0f, 0.0f,	//cara frontal
+		 0.5f, -0.5f,  0.5f,  1.000f, 0.788f, 0.851f,  1.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  0.847f, 0.706f, 0.902f,  1.0f, 1.0f,
+		 0.5f,  0.5f,  0.5f,  0.847f, 0.706f, 0.902f,  1.0f, 1.0f,
+		-0.5f,  0.5f,  0.5f,  1.000f, 0.714f, 0.757f,  0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f,  1.000f, 0.788f, 0.851f,  0.0f, 0.0f,
+
+		-0.5f,  0.5f,  0.5f,  1.000f, 0.788f, 0.851f,  1.0f, 0.0f,	//cara izquierda
+		-0.5f,  0.5f, -0.5f,  1.000f, 0.788f, 0.851f,  1.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.847f, 0.706f, 0.902f,  0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.847f, 0.706f, 0.902f,  0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f,  1.000f, 0.714f, 0.757f,  0.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,  1.000f, 0.788f, 0.851f,  1.0f, 0.0f,
+
+		 0.5f,  0.5f,  0.5f,  1.000f, 0.788f, 0.851f,  1.0f, 0.0f,	//cara derecha
+		 0.5f,  0.5f, -0.5f,  1.000f, 0.788f, 0.851f,  1.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f,  0.847f, 0.706f, 0.902f,  0.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f,  0.847f, 0.706f, 0.902f,  0.0f, 1.0f,
+		 0.5f, -0.5f,  0.5f,  1.000f, 0.714f, 0.757f,  0.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  1.000f, 0.788f, 0.851f,  1.0f, 0.0f,
+
+		-0.5f, -0.5f, -0.5f,  1.000f, 0.788f, 0.851f,  0.0f, 1.0f,	//cara inferior
+		 0.5f, -0.5f, -0.5f,  1.000f, 0.788f, 0.851f,  1.0f, 1.0f,
+		 0.5f, -0.5f,  0.5f,  0.847f, 0.706f, 0.902f,  1.0f, 0.0f,
+		 0.5f, -0.5f,  0.5f,  0.847f, 0.706f, 0.902f,  1.0f, 0.0f,
+		-0.5f, -0.5f,  0.5f,  1.000f, 0.714f, 0.757f,  0.0f, 0.0f,
+		-0.5f, -0.5f, -0.5f,  1.000f, 0.788f, 0.851f,  0.0f, 1.0f,
+
+		-0.5f,  0.5f, -0.5f,  1.000f, 0.788f, 0.851f,  0.0f, 1.0f,	//cara superior
+		 0.5f,  0.5f, -0.5f,  1.000f, 0.788f, 0.851f,  1.0f, 1.0f,
+		 0.5f,  0.5f,  0.5f,  0.847f, 0.706f, 0.902f,  1.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  0.847f, 0.706f, 0.902f,  1.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,  1.000f, 0.714f, 0.757f,  0.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f,  1.000f, 0.788f, 0.851f,  0.0f, 1.0f
 	};
 
 	GLuint indices[] = {
@@ -122,27 +161,37 @@ int main()
     shaderProgram.Activate(); //Activa el shader program para usarlo
     glUniform1i(tex0Uni, 0); //Asigna la unidad de textura 0 al sampler (usar glUniform1i)
 
-    // Subir la matriz de transformación al shader (programa ya activado)
-    
-
 	while(!glfwWindowShouldClose(window)) //Indica a la ventana que no debe cerrarse a menos de que otra funcion se lo indique
 	{
 		processInput(window);
 		// Renderizado: limpiar color del buffer cada frame
 		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		glBindTexture(GL_TEXTURE_2D, texture); //Enlaza la textura como una textura 2D
 
 		VAO1.Bind(); //Enlaza el VAO para usarlo en el renderizado
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0); //Dibuja el triángulo usando los vértices definidos en el VBO 
+		//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0); //Dibuja el triángulo usando los vértices definidos en el VBO 
+		glDrawArrays(GL_TRIANGLES, 0, 36); //Dibuja el cubo usando los vértices definidos en el VBO. El segundo parámetro es el índice de inicio (0) y el tercero es el número de vértices a dibujar (36 para un cubo con 12 triángulos)
 
 		//Transformaciones
-		glm::mat4 trans = glm::mat4(1.0f);
-		trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
-		trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
-		unsigned int transformLoc = glGetUniformLocation(shaderProgram.ID, "transform");
-		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
+		glm::mat4 model = glm::mat4(1.0f);//Inicializa la matriz de modelo como la matriz identidad
+		glm::mat4 view = glm::mat4(1.0f);//Inicializa la matriz de vista como la matriz identidad
+		glm::mat4 proyection;
+
+		model = glm::rotate(model, (float)glfwGetTime() * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));//Aplica una rotación de -55 grados alrededor del eje x a la matriz de modelo
+		view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));//Aplica una traslación de -3 unidades en el eje z a la matriz de vista para "alejar la cámara del objeto" (en realidad aleja el mundo, y por ende el objeto, de la cámara)
+		proyection = glm::perspective(glm::radians(45.0f), 800.0f / 800.0f, 0.1f, 100.0f);//Crea una matriz de proyección perspectiva con un campo de visión de 45 grados, una relación de aspecto de 1 (800/800), un plano cercano a 0.1 y un plano lejano a 100
+
+		//Pasa las matrices al shader
+		int modelLoc = glGetUniformLocation(shaderProgram.ID, "model"); //Obtiene la ubicación del uniform "model" en el shader de vértices
+		int viewLoc = glGetUniformLocation(shaderProgram.ID, "view"); //Obtiene la ubicación del uniform "view" en el shader de vértices
+		int projLoc = glGetUniformLocation(shaderProgram.ID, "projection"); //Obtiene la ubicación del uniform "projection" en el shader de vértices
+
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));//value_ptr(model) convierte la matriz model a un puntero a float, que es el formato que OpenGL espera para las matrices. El tercer parámetro GL_FALSE indica que no se debe transponer la matriz al cargarla en el shader
+		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(proyection));
+
 		// Intercambia buffers y procesa eventos
 		glfwSwapBuffers(window);
 		glfwPollEvents();

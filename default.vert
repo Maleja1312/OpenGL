@@ -7,11 +7,13 @@ out vec3 ourColor; //Salida del color del vértice para pasar al shader de fragm
 
 out vec2 TexCoord; //Salida de las coordenadas de textura para pasar al shader de fragmento
 
-uniform mat4 transform; //Uniforme para la matriz de transformación
+uniform mat4 model; //Matriz de modelo para transformar las coordenadas del vértice
+uniform mat4 view; //Matriz de vista para transformar las coordenadas del vértice
+uniform mat4 projection; //Matriz de proyección para transformar las coordenadas del vértice
 
 void main()
 {
-   gl_Position = transform * vec4(aPos, 1.0f); //Convierte la posición del vértice de vec3 a vec4 (x, y, z, w) para que OpenGL pueda procesarla. w se establece en 1.0 para mantener la posición original sin perspectiva
+   gl_Position = projection * view * model * vec4(aPos, 1.0); //Calcula la posición final del vértice multiplicando las matrices de proyección, vista y modelo por la posición del vértice (aPos) convertida a un vector de 4 componentes (vec4) con un valor de w de 1.0 para mantener la homogeneidad
    ourColor = aColor; //Pasa el color del vértice a la variable de salida ourColor para que el shader de fragmento pueda usarlo para determinar el color final del pixel
    TexCoord = vec2(aTexCoord.x, aTexCoord.y); //Pasa las coordenadas de textura del vértice a la variable de salida TexCoord para que el shader de fragmento pueda usarlo para mapear la textura correctamente
 }
