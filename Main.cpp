@@ -2,6 +2,9 @@
 #include<glad/glad.h>//Primero se incluye glad.h para cargar las funciones de OpenGL antes de incluir GLFW, ya que GLFW depende de OpenGL para funcionar correctamente!!!!
 #include<GLFW/glfw3.h>
 #include<stb/stb_image.h>
+#include <glm/glm.hpp> //Incluye la biblioteca GLM para matemáticas
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include"shaderClass.h" //Incluye la clase Shader
 #include"VAO.h"//Incluye la clase VAO
@@ -54,7 +57,7 @@ int main()
 
 	//Vertices de triangulo equilatero con centro en el origen
 	GLfloat vertices[] =
-	{	//Posicion            //Color                     //Texcoords 
+	{ 	//Posicion            //Color                     //Texcoords 
 		-0.5f, -0.5f, 0.0f,   1.000f, 0.714f, 0.757f,     0.0f, 0.0f, // Abajo izquierda (rosado) 
 		-0.5f,  0.5f, 0.0f,   1.000f, 0.788f, 0.851f,     0.0f, 1.0f, // Arriba izquierda (intermedio)  
 		0.5f,  0.5f, 0.0f,   0.847f, 0.706f, 0.902f,     1.0f, 1.0f, // Arriba derecha (violeta)  
@@ -65,7 +68,7 @@ int main()
 		0, 2, 1 , //Triangulo superior
 		0, 3, 2	  //Triangulo inferior
 	};
-
+	
 	Shader shaderProgram("default.vert", "default.frag"); //Crea un objeto de la clase Shader llamado shaderProgram, que compila y enlaza los shaders "default.vert" y "default.frag"
 	
 	VAO VAO1; //Crea un objeto de la clase VAO llamado VAO1
@@ -119,6 +122,9 @@ int main()
     shaderProgram.Activate(); //Activa el shader program para usarlo
     glUniform1i(tex0Uni, 0); //Asigna la unidad de textura 0 al sampler (usar glUniform1i)
 
+    // Subir la matriz de transformación al shader (programa ya activado)
+    
+
 	while(!glfwWindowShouldClose(window)) //Indica a la ventana que no debe cerrarse a menos de que otra funcion se lo indique
 	{
 		processInput(window);
@@ -131,6 +137,12 @@ int main()
 		VAO1.Bind(); //Enlaza el VAO para usarlo en el renderizado
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0); //Dibuja el triángulo usando los vértices definidos en el VBO 
 
+		//Transformaciones
+		glm::mat4 trans = glm::mat4(1.0f);
+		trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
+		trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+		unsigned int transformLoc = glGetUniformLocation(shaderProgram.ID, "transform");
+		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
 		// Intercambia buffers y procesa eventos
 		glfwSwapBuffers(window);
 		glfwPollEvents();
