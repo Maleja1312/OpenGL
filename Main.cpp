@@ -10,6 +10,7 @@
 #include"VAO.h"//Incluye la clase VAO
 #include"VBO.h"//Incluye la clase VBO
 #include"EBO.h"//Incluye la clase EBO
+#include <vector>//Incluye la biblioteca vector para usar std::vector
 
 
 // Funcion callback se llama cada vez que redimensiona la ventana
@@ -24,6 +25,82 @@ void processInput(GLFWwindow* window)
 }
 
 
+class Cubo {
+public:
+	std::vector<float> vertices;
+	std::vector<glm::vec3> posiciones;
+
+	void setPosiciones() {
+		posiciones = {
+			glm::vec3(0.0f,  0.0f,  0.0f),
+			glm::vec3(2.0f,  5.0f, -15.0f),
+			glm::vec3(-1.5f, -2.2f, -2.5f),
+			glm::vec3(-3.8f, -2.0f, -12.3f),
+			glm::vec3(2.4f, -0.4f, -3.5f),
+			glm::vec3(-1.7f,  3.0f, -7.5f),
+			glm::vec3(1.3f, -2.0f, -2.5f),
+			glm::vec3(1.5f,  2.0f, -2.5f),
+			glm::vec3(1.5f,  0.2f, -1.5f),
+			glm::vec3(-1.3f,  1.0f, -1.5f)
+		};
+	}
+	glm::vec3* getPosiciones()
+	{
+		return posiciones.data();
+	}
+
+	void setVertices()
+	{
+		vertices = {
+			// Posicion            //Color				   //Texcoords 
+			-0.5f, -0.5f, -0.5f,  1.000f, 0.788f, 0.851f,  0.0f, 0.0f,	//cara trasera
+			 0.5f, -0.5f, -0.5f,  1.000f, 0.788f, 0.851f,  1.0f, 0.0f,
+			 0.5f,  0.5f, -0.5f,  0.847f, 0.706f, 0.902f,  1.0f, 1.0f,
+			 0.5f,  0.5f, -0.5f,  0.847f, 0.706f, 0.902f,  1.0f, 1.0f,
+			-0.5f,  0.5f, -0.5f,  1.000f, 0.714f, 0.757f,  0.0f, 1.0f,
+			-0.5f, -0.5f, -0.5f,  1.000f, 0.788f, 0.851f,  0.0f, 0.0f,
+
+			-0.5f, -0.5f,  0.5f,  1.000f, 0.788f, 0.851f,  0.0f, 0.0f,	//cara frontal
+			 0.5f, -0.5f,  0.5f,  1.000f, 0.788f, 0.851f,  1.0f, 0.0f,
+			 0.5f,  0.5f,  0.5f,  0.847f, 0.706f, 0.902f,  1.0f, 1.0f,
+			 0.5f,  0.5f,  0.5f,  0.847f, 0.706f, 0.902f,  1.0f, 1.0f,
+			-0.5f,  0.5f,  0.5f,  1.000f, 0.714f, 0.757f,  0.0f, 1.0f,
+			-0.5f, -0.5f,  0.5f,  1.000f, 0.788f, 0.851f,  0.0f, 0.0f,
+
+			-0.5f,  0.5f,  0.5f,  1.000f, 0.788f, 0.851f,  1.0f, 0.0f,	//cara izquierda
+			-0.5f,  0.5f, -0.5f,  1.000f, 0.788f, 0.851f,  1.0f, 1.0f,
+			-0.5f, -0.5f, -0.5f,  0.847f, 0.706f, 0.902f,  0.0f, 1.0f,
+			-0.5f, -0.5f, -0.5f,  0.847f, 0.706f, 0.902f,  0.0f, 1.0f,
+			-0.5f, -0.5f,  0.5f,  1.000f, 0.714f, 0.757f,  0.0f, 0.0f,
+			-0.5f,  0.5f,  0.5f,  1.000f, 0.788f, 0.851f,  1.0f, 0.0f,
+
+			 0.5f,  0.5f,  0.5f,  1.000f, 0.788f, 0.851f,  1.0f, 0.0f,	//cara derecha
+			 0.5f,  0.5f, -0.5f,  1.000f, 0.788f, 0.851f,  1.0f, 1.0f,
+			 0.5f, -0.5f, -0.5f,  0.847f, 0.706f, 0.902f,  0.0f, 1.0f,
+			 0.5f, -0.5f, -0.5f,  0.847f, 0.706f, 0.902f,  0.0f, 1.0f,
+			 0.5f, -0.5f,  0.5f,  1.000f, 0.714f, 0.757f,  0.0f, 0.0f,
+			 0.5f,  0.5f,  0.5f,  1.000f, 0.788f, 0.851f,  1.0f, 0.0f,
+
+			-0.5f, -0.5f, -0.5f,  1.000f, 0.788f, 0.851f,  0.0f, 1.0f,	//cara inferior
+			 0.5f, -0.5f, -0.5f,  1.000f, 0.788f, 0.851f,  1.0f, 1.0f,
+			 0.5f, -0.5f,  0.5f,  0.847f, 0.706f, 0.902f,  1.0f, 0.0f,
+			 0.5f, -0.5f,  0.5f,  0.847f, 0.706f, 0.902f,  1.0f, 0.0f,
+			-0.5f, -0.5f,  0.5f,  1.000f, 0.714f, 0.757f,  0.0f, 0.0f,
+			-0.5f, -0.5f, -0.5f,  1.000f, 0.788f, 0.851f,  0.0f, 1.0f,
+
+			-0.5f,  0.5f, -0.5f,  1.000f, 0.788f, 0.851f,  0.0f, 1.0f,	//cara superior
+			 0.5f,  0.5f, -0.5f,  1.000f, 0.788f, 0.851f,  1.0f, 1.0f,
+			 0.5f,  0.5f,  0.5f,  0.847f, 0.706f, 0.902f,  1.0f, 0.0f,
+			 0.5f,  0.5f,  0.5f,  0.847f, 0.706f, 0.902f,  1.0f, 0.0f,
+			-0.5f,  0.5f,  0.5f,  1.000f, 0.714f, 0.757f,  0.0f, 0.0f,
+			-0.5f,  0.5f, -0.5f,  1.000f, 0.788f, 0.851f,  0.0f, 1.0f
+		};
+	}
+	float* getVertices()
+	{
+		return vertices.data();
+	}
+};
 
 int main()
 {
@@ -57,79 +134,25 @@ int main()
 	glViewport(0, 0, 800, 800); // Ajusta viewport inicial
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback); // Registra la función callback
 
-	//Vertices de triangulo equilatero con centro en el origen
-	float vertices[] =
-	{ 	//Posicion            //Color				   //Texcoords 
-		-0.5f, -0.5f, -0.5f,  1.000f, 0.788f, 0.851f,  0.0f, 0.0f,	//cara trasera
-		 0.5f, -0.5f, -0.5f,  1.000f, 0.788f, 0.851f,  1.0f, 0.0f,
-		 0.5f,  0.5f, -0.5f,  0.847f, 0.706f, 0.902f,  1.0f, 1.0f,
-		 0.5f,  0.5f, -0.5f,  0.847f, 0.706f, 0.902f,  1.0f, 1.0f,
-		-0.5f,  0.5f, -0.5f,  1.000f, 0.714f, 0.757f,  0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  1.000f, 0.788f, 0.851f,  0.0f, 0.0f,
+    //Vertices de triangulo equilatero con centro en el origen
+	Cubo cubitos; //Crea un objeto de la clase Cubo llamado cubitos
+	// Inicializar datos antes de obtener punteros a su memoria interna			
+	cubitos.setVertices();
+	cubitos.setPosiciones();
+	float* vertices = cubitos.getVertices(); //Puntero a los vértices del cubo (ya inicializados)
 
-		-0.5f, -0.5f,  0.5f,  1.000f, 0.788f, 0.851f,  0.0f, 0.0f,	//cara frontal
-		 0.5f, -0.5f,  0.5f,  1.000f, 0.788f, 0.851f,  1.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f,  0.847f, 0.706f, 0.902f,  1.0f, 1.0f,
-		 0.5f,  0.5f,  0.5f,  0.847f, 0.706f, 0.902f,  1.0f, 1.0f,
-		-0.5f,  0.5f,  0.5f,  1.000f, 0.714f, 0.757f,  0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f,  1.000f, 0.788f, 0.851f,  0.0f, 0.0f,
-
-		-0.5f,  0.5f,  0.5f,  1.000f, 0.788f, 0.851f,  1.0f, 0.0f,	//cara izquierda
-		-0.5f,  0.5f, -0.5f,  1.000f, 0.788f, 0.851f,  1.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  0.847f, 0.706f, 0.902f,  0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  0.847f, 0.706f, 0.902f,  0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f,  1.000f, 0.714f, 0.757f,  0.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f,  1.000f, 0.788f, 0.851f,  1.0f, 0.0f,
-
-		 0.5f,  0.5f,  0.5f,  1.000f, 0.788f, 0.851f,  1.0f, 0.0f,	//cara derecha
-		 0.5f,  0.5f, -0.5f,  1.000f, 0.788f, 0.851f,  1.0f, 1.0f,
-		 0.5f, -0.5f, -0.5f,  0.847f, 0.706f, 0.902f,  0.0f, 1.0f,
-		 0.5f, -0.5f, -0.5f,  0.847f, 0.706f, 0.902f,  0.0f, 1.0f,
-		 0.5f, -0.5f,  0.5f,  1.000f, 0.714f, 0.757f,  0.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f,  1.000f, 0.788f, 0.851f,  1.0f, 0.0f,
-
-		-0.5f, -0.5f, -0.5f,  1.000f, 0.788f, 0.851f,  0.0f, 1.0f,	//cara inferior
-		 0.5f, -0.5f, -0.5f,  1.000f, 0.788f, 0.851f,  1.0f, 1.0f,
-		 0.5f, -0.5f,  0.5f,  0.847f, 0.706f, 0.902f,  1.0f, 0.0f,
-		 0.5f, -0.5f,  0.5f,  0.847f, 0.706f, 0.902f,  1.0f, 0.0f,
-		-0.5f, -0.5f,  0.5f,  1.000f, 0.714f, 0.757f,  0.0f, 0.0f,
-		-0.5f, -0.5f, -0.5f,  1.000f, 0.788f, 0.851f,  0.0f, 1.0f,
-
-		-0.5f,  0.5f, -0.5f,  1.000f, 0.788f, 0.851f,  0.0f, 1.0f,	//cara superior
-		 0.5f,  0.5f, -0.5f,  1.000f, 0.788f, 0.851f,  1.0f, 1.0f,
-		 0.5f,  0.5f,  0.5f,  0.847f, 0.706f, 0.902f,  1.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f,  0.847f, 0.706f, 0.902f,  1.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f,  1.000f, 0.714f, 0.757f,  0.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f,  1.000f, 0.788f, 0.851f,  0.0f, 1.0f
-	};
-
-
-	GLuint indices[] = {
-		0, 2, 1 , //Triangulo superior
-		0, 3, 2	  //Triangulo inferior
-	};
+	
 
 	//Posiciones de 10 cubos en el espacio 3D
-	glm::vec3 cubePositions[] = {
-		glm::vec3(0.0f,  0.0f,  0.0f),
-		glm::vec3(2.0f,  5.0f, -15.0f),
-		glm::vec3(-1.5f, -2.2f, -2.5f),
-		glm::vec3(-3.8f, -2.0f, -12.3f),
-		glm::vec3(2.4f, -0.4f, -3.5f),
-		glm::vec3(-1.7f,  3.0f, -7.5f),
-		glm::vec3(1.3f, -2.0f, -2.5f),
-		glm::vec3(1.5f,  2.0f, -2.5f),
-		glm::vec3(1.5f,  0.2f, -1.5f),
-		glm::vec3(-1.3f,  1.0f, -1.5f)
-	};
+	glm::vec3* cubePositions = cubitos.getPosiciones(); //Llama al método setPosiciones() del objeto cubitos para obtener un puntero a las posiciones de los cubos
 
 	Shader shaderProgram("default.vert", "default.frag"); //Crea un objeto de la clase Shader llamado shaderProgram, que compila y enlaza los shaders "default.vert" y "default.frag"
 	
 	VAO VAO1; //Crea un objeto de la clase VAO llamado VAO1
 	VAO1.Bind(); //Enlaza el VAO para usarlo
 
-	VBO VBO1(vertices, sizeof(vertices)); //Crea un objeto de la clase VBO llamado VBO1, que carga los datos de vértice definidos en el arreglo vertices
-	EBO EBO1(indices, sizeof(indices)); //Crea un objeto de la clase EBO llamado EBO1, que carga los datos de índice definidos en el arreglo indices
+    // Use the actual number of bytes from the cubitos vector (not sizeof(pointer))
+	VBO VBO1(vertices, cubitos.vertices.size() * sizeof(float)); //Crea un objeto de la clase VBO llamado VBO1, que carga los datos de vértice definidos en el arreglo vertices
 	
     shaderProgram.Activate(); //Activa el shader program para usarlo en el renderizado
 
@@ -148,13 +171,22 @@ int main()
     VBO1.Unbind(); //Desenlaza el VBO
 
 	//Texturas
-
     int widthImg, heightImg, numColCh;
+
     // Flip vertically so texture coords match OpenGL convention (optional depending on image)
     stbi_set_flip_vertically_on_load(true);
     unsigned char* bytes = stbi_load("descarga.jpg", &widthImg, &heightImg, &numColCh, 0); //Carga la imagen "descarga.jpg"
+	if (!bytes) {
+		std::cout << "Failed to load texture 'descarga.jpg'\n";
+		// Liberar recursos y salir limpiamente
+		VAO1.Delete();
+		VBO1.Delete();
+		glfwDestroyWindow(window);
+		glfwTerminate();
+		return -1;
+	}
 
-	GLuint texture;
+	GLuint texture;//Declara una variable GLuint llamada texture para almacenar el ID de la textura generada por OpenGL
 	glGenTextures(1, &texture); //Genera un ID para la textura
 	glActiveTexture(GL_TEXTURE0); //Activa la unidad de textura 0
 	glBindTexture(GL_TEXTURE_2D, texture); //Enlaza la textura como una textura 2D
@@ -168,7 +200,7 @@ int main()
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, widthImg, heightImg, 0, GL_RGB, GL_UNSIGNED_BYTE, bytes); //Carga la imagen en la textura usando glTexImage2D. Especifica el formato de la imagen (RGB) y el tipo de datos (unsigned byte)
 	glGenerateMipmap(GL_TEXTURE_2D); //Genera mipmaps para la textura, lo que mejora la calidad visual al reducir la textura a tamaños más pequeños
 
-
+	
 	stbi_image_free(bytes); //Libera la memoria de la imagen cargada
 	glBindTexture(GL_TEXTURE_2D, 0); //Desenlaza la textura
 
@@ -189,33 +221,27 @@ int main()
 		//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0); //Dibuja el triángulo usando los vértices definidos en el VBO 
 		glDrawArrays(GL_TRIANGLES, 0, 36); //Dibuja el cubo usando los vértices definidos en el VBO. El segundo parámetro es el índice de inicio (0) y el tercero es el número de vértices a dibujar (36 para un cubo con 12 triángulos)
 
-
-
-		shaderProgram.Activate(); //Activa el shader program para usarlo en el renderizado
-
 		// Activar shader y subir view/projection cada frame
 		shaderProgram.Activate();
-		glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -3.0f));
-		glm::mat4 projection = glm::perspective(glm::radians(45.0f), 800.0f / 800.0f, 0.1f, 100.0f);
+		glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -3.0f));// Crea una matriz de vista que traslada la escena 3 unidades hacia atrás en el eje z
+		glm::mat4 projection = glm::perspective(glm::radians(45.0f), 800.0f / 800.0f, 0.1f, 100.0f);// Crea una matriz de proyección perspectiva con un campo de visión de 45 grados, una relación de aspecto de 1 (800/800), un plano cercano a 0.1 y un plano lejano a 100
 
-		int viewLoc = glGetUniformLocation(shaderProgram.ID, "view");
-		int projLoc = glGetUniformLocation(shaderProgram.ID, "projection");
-		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+		int viewLoc = glGetUniformLocation(shaderProgram.ID, "view");//obtiene la ubicación del uniform "view" en el shader program
+		int projLoc = glGetUniformLocation(shaderProgram.ID, "projection");//obtiene la ubicación del uniform "projection" en el shader program
+		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));//sube la matriz de vista al shader usando glUniformMatrix4fv
+		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));//sube la matriz de proyección al shader usando glUniformMatrix4fv
+		
+		int modelLoc = glGetUniformLocation(shaderProgram.ID, "model");//obtiene la ubicación del uniform "model" en el shader program
 
-		// Bind VAO y textura (ya haces glBindTexture antes)
-		VAO1.Bind();
-		int modelLoc = glGetUniformLocation(shaderProgram.ID, "model");
-
-		for (unsigned int i = 0; i < 10; i++)
+		for (unsigned int i = 0; i < 10; i++)// iteracion para dibujar los 10 cubos que rotan a diferentes velocidades
 		{
-			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, cubePositions[i]);
-			float angle = (20.0f * (i+1)) / 2.7 ;
-			model = glm::rotate(model, (float)glfwGetTime() * glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+			glm::mat4 model = glm::mat4(1.0f);// Matriz de modelo inicializada como identidad
+			model = glm::translate(model, cubePositions[i]);// Aplica una traslación a la matriz de modelo usando la posición del cubo actual
+			float angle = (20.0f * (i+1)) / 2.7 ;// Calcula un ángulo de rotación basado en el índice del cubo para que cada cubo gire a una velocidad diferente
+			model = glm::rotate(model, (float)glfwGetTime() * glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));// Aplica una rotación a la matriz de modelo usando el tiempo transcurrido y el ángulo calculado, con un eje de rotación (1.0f, 0.3f, 0.5f)
+			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));// Sube la matriz de modelo al shader usando glUniformMatrix4fv
 
-			glDrawArrays(GL_TRIANGLES, 0, 36);
+			glDrawArrays(GL_TRIANGLES, 0, 36);// Dibuja el cubo usando los vértices definidos en el VBO.
 		}
 		VAO1.Unbind();
 		// Intercambia buffers y procesa eventos
@@ -226,7 +252,6 @@ int main()
 	//Para liberar recursos, se eliminan los objetos de OpenGL creados (VAO, VBO, shader program), se destruye la ventana creada y termina GLFW para liberar recursos
 	VAO1.Delete();
 	VBO1.Delete();
-	EBO1.Delete();
 	glDeleteTextures(1, &texture);
 	shaderProgram.Delete();
 
