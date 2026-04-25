@@ -1,18 +1,4 @@
-#include<iostream>
-#include<glad/glad.h>//Primero se incluye glad.h para cargar las funciones de OpenGL antes de incluir GLFW, ya que GLFW depende de OpenGL para funcionar correctamente!!!!
-#include<GLFW/glfw3.h>
-#include<stb/stb_image.h>
-#include <glm/glm.hpp> //Incluye la biblioteca GLM para matemáticas
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
-#include"shaderClass.h" //Incluye la clase Shader
-#include"VAO.h"//Incluye la clase VAO
-#include"VBO.h"//Incluye la clase VBO
-#include"EBO.h"//Incluye la clase EBO
-#include"Camera.h"//Incluye la clase Camera
-#include <vector>//Incluye la biblioteca vector para usar std::vector
-
+#include"Mesh.h"
 
 // Funcion callback se llama cada vez que redimensiona la ventana
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
@@ -142,6 +128,12 @@ int main()
 	cubitos.setPosiciones();
 	float* vertices = cubitos.getVertices(); //Puntero a los vértices del cubo (ya inicializados)
 
+	GLuint indices[] =
+	{
+		0, 1, 2,
+		0, 2, 3
+	};
+
     //Posiciones de 10 cubos en el espacio 3D (se usa el array estático más abajo)
 	// Nota: no usar el puntero a cubitos.getPosiciones() para evitar duplicar datos
 
@@ -173,53 +165,24 @@ int main()
 	};
 
 // Número de índices para el cubo de la luz
-GLsizei lightIndexCount = sizeof(lightIndices) / sizeof(lightIndices[0]);
+	GLsizei lightIndexCount = sizeof(lightIndices) / sizeof(lightIndices[0]);
+
+	//Imagen de textura
+	const char* texture1 = "descarga.jpg"; //Asigna la ruta de la imagen de textura a la variable texture
 
 	Shader shaderProgram("default.vert", "default.frag"); //Crea un objeto de la clase Shader llamado shaderProgram, que compila y enlaza los shaders "default.vert" y "default.frag"
-	
-	VAO VAO1; //Crea un objeto de la clase VAO llamado VAO1
-	VAO1.Bind(); //Enlaza el VAO para usarlo
-
-
-    // Use the actual number of bytes from the cubitos vector (not sizeof(pointer))
-	VBO VBO1(vertices, cubitos.vertices.size() * sizeof(float)); //Crea un objeto de la clase VBO llamado VBO1, que carga los datos de vértice definidos en el arreglo vertices
-	
-    shaderProgram.Activate(); //Activa el shader program para usarlo en el renderizado
-
-    // Configurar atributos manualmente: posición (location = 0), color (location = 1), texcoord (location = 2) y normal (location = 3)
-	// Cada vértice tiene 11 floats: 3 posición, 3 color, 2 texcoords, 3 normales
-	VBO1.Bind();
-	GLsizei stride = 11 * sizeof(float);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (void*)0); // position
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, (void*)(3 * sizeof(float))); // color
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, stride, (void*)(6 * sizeof(float))); // texcoords
-	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, stride, (void*)(8 * sizeof(float))); // normal
-	glEnableVertexAttribArray(3);
-    // No desenlazamos el EBO aquí: debe permanecer ligado al VAO para glDrawElements
-    VAO1.Unbind(); //Desenlaza el VAO para evitar modificaciones accidentales
-    VBO1.Unbind(); //Desenlaza el VBO
-
+	std::vector<Vertex> verts(vertices, vertices + sizeof(vertices) / sizeof(Vertex)); //Crea un vector de vértices llamado verts, que se inicializa con los datos del arreglo vertices. El tamaño del vector se calcula dividiendo el tamaño total del arreglo por el tamaño de un float (ya que cada vértice tiene múltiples componentes)
+	std::vector<GLuint> ind(indices, indices + sizeof(indices) / sizeof(GLuint)); //Crea un vector de índices llamado ind, que se inicializa con los datos del arreglo indices. El tamaño del vector se calcula dividiendo el tamaño total del arreglo por el tamaño de un GLuint (ya que cada índice es un GLuint) el vector indices se define en Mesh.h
+	std::vector<Texture> tex(texture1, texture1 + sizeof(texture1) / sizeof(Texture)); //Crea un vector de texturas llamado tex, que se inicializa con los datos del arreglo textures. El tamaño del vector se calcula dividiendo el tamaño total del arreglo por el tamaño de un Texture (ya que cada textura es un objeto de la clase Texture) texture corresponde a la textura cargada en el main, se define como GLuint texture y se carga con la imagen "descarga.jpg"
+	Mesh floor(verts, ind, tex); //Crea un objeto de la clase Mesh llamado floor, que se inicializa con los vértices, índices y texturas definidos en los vectores verts, ind y tex respectivamente. Este objeto representa el piso de la escena
 
 	Shader lightShader("light.vert", "light.frag"); //Crea un objeto de la clase Shader llamado lightShader, que compila y enlaza los shaders "light.vert" y "light.frag"
-
-	VAO lightVAO; //Crea un objeto de la clase VAO llamado lightVAO
-	lightVAO.Bind(); //Enlaza el VAO para usarlo
-
-	VBO lightVBO(lightVertices, sizeof(lightVertices)); //Crea un objeto de la clase VBO llamado lightVBO, que carga los datos de vértice definidos en el arreglo lightVertices
-	EBO lightEBO(lightIndices, sizeof(lightIndices)); //Crea un objeto de la clase EBO llamado lightEBO, que carga los datos de índice definidos en el arreglo lightIndices
-	
-	// Configura el atributo de posición para el shader de luz
-	lightVAO.LinkAttrib(lightVBO, 0, 3, GL_FLOAT, 3 * sizeof(float), (void*)0); //Configura el atributo de posición para el shader de luz (location = 0)
-
-	//
-    lightVAO.Unbind(); //Desenlaza el VAO para evitar modificaciones accidentales
-	lightVBO.Unbind(); //Desenlaza el VBO
-	glm::vec3 lightColor = glm::vec3(1.0f); //Define el color de la luz como blanco (RGBA)
+	std::vector<Vertex> lightVerts(lightVertices, lightVertices + sizeof(lightVertices) / sizeof(Vertex)); //Crea un vector de vértices llamado lightVerts, que se inicializa con los datos del arreglo lightVertices. El tamaño del vector se calcula dividiendo el tamaño total del arreglo por el tamaño de un float (ya que cada vértice tiene múltiples componentes)
+	std::vector<GLuint> lightInd(lightIndices, lightIndices + sizeof(lightIndices) / sizeof(GLuint)); //Crea un vector de índices llamado lightInd, que se inicializa con los datos del arreglo lightIndices. El tamaño del vector se calcula dividiendo el tamaño total del arreglo por el tamaño de un GLuint (ya que cada índice es un GLuint)
+	Mesh light(lightVerts, lightInd, tex); //Crea un objeto de la clase Mesh llamado light, que se inicializa con los vértices y índices definidos en los vectores lightVerts y lightInd respectivamente, y un vector de texturas vacío. Este objeto representa la luz en la escena
 
 	// Configuración de la luz
+	glm::vec3 lightColor = glm::vec3(1.0f); //Define el color de la luz como blanco (RGBA)
     glm::vec3 lightPos= glm::vec3(0.8f, 0.9f, 0.0f); //Define la posición de la luz en el espacio 3D (mover hacia la escena)
 	glm::mat4 lightModel = glm::mat4(1.0f); //Crea una matriz de modelo para la luz, inicializada como la matriz identidad (sin transformaciones)
 	lightModel = glm::translate(lightModel, lightPos); //Aplica una traslación a la matriz de modelo para colocar la luz en la posición definida por lightPos
@@ -257,9 +220,6 @@ GLsizei lightIndexCount = sizeof(lightIndices) / sizeof(lightIndices[0]);
     unsigned char* bytes = stbi_load("descarga.jpg", &widthImg, &heightImg, &numColCh, 0); //Carga la imagen "descarga.jpg"
 	if (!bytes) {
 		std::cout << "Failed to load texture 'descarga.jpg'\n";
-		// Liberar recursos y salir limpiamente
-		VAO1.Delete();
-		VBO1.Delete();
 		glfwDestroyWindow(window);
 		glfwTerminate();
 		return -1;
@@ -304,33 +264,19 @@ GLsizei lightIndexCount = sizeof(lightIndices) / sizeof(lightIndices[0]);
 		camera.Inputs(window); //Llama al método Inputs del objeto camera para manejar la entrada del usuario (teclado y mouse) y actualizar la posición y orientación de la cámara en consecuencia
 		camera.updateMatrix(45.0f, 0.1f, 100.0f); //Llama al método Matrix del objeto camera para configurar las matrices de vista y proyección en el shader program usando el uniform "camMatrix"
 		
-		shaderProgram.Activate(); //Activa el shader program para usarlo en el renderizado
-		camera.Matrix(shaderProgram, "camMatrix"); //Configura las matrices de vista y proyección para el shader program usando el uniform "camMatrix"
-		VAO1.Bind(); //Enlaza el VAO para usarlo en el renderizado
-		//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0); //Dibuja el triángulo usando los vértices definidos en el VBO 
+		floor.Draw(shaderProgram, camera); //Llama al método Draw del objeto floor para renderizar el piso usando el shader program y la cámara
+		light.Draw(lightShader, camera); //Llama al método Draw del objeto light para renderizar la luz usando el shader de luz y la cámara
 		
-
-		int modelLoc = glGetUniformLocation(shaderProgram.ID, "model");//obtiene la ubicación del uniform "model" en el shader program
-		
-		glDrawArrays(GL_TRIANGLES, 0, 36);// Dibuja el cubo usando los vértices definidos en el VBO.
-
-		lightShader.Activate(); //Activa el shader de la luz para usarlo en el renderizado
-		camera.Matrix(lightShader, "camMatrix"); //Configura las matrices de vista y proyección para el shader de la luz usando el uniform "camMatrix"
-        lightVAO.Bind(); //Enlaza el VAO de la luz para usarlo en el renderizado
-		// Dibujar usando índices (EBO) con el conteo correcto para evitar lectura fuera de límites
-		glDrawElements(GL_TRIANGLES, lightIndexCount, GL_UNSIGNED_INT, 0);
-
-		VAO1.Unbind();
 		// Intercambia buffers y procesa eventos
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
 
 	//Para liberar recursos, se eliminan los objetos de OpenGL creados (VAO, VBO, shader program), se destruye la ventana creada y termina GLFW para liberar recursos
-	VAO1.Delete();
-	VBO1.Delete();
+	
 	glDeleteTextures(1, &texture);
 	shaderProgram.Delete();
+	lightShader.Delete();
 
 	glfwDestroyWindow(window);
 	glfwTerminate();
