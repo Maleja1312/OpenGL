@@ -128,11 +128,9 @@ int main()
 	cubitos.setPosiciones();
 	float* vertices = cubitos.getVertices(); //Puntero a los vértices del cubo (ya inicializados)
 
-	GLuint indices[] =
-	{
-		0, 1, 2,
-		0, 2, 3
-	};
+	std::vector<GLuint> ind;
+	for (GLuint i = 0; i < 36; i++)
+		ind.push_back(i);
 
     //Posiciones de 10 cubos en el espacio 3D (se usa el array estático más abajo)
 	// Nota: no usar el puntero a cubitos.getPosiciones() para evitar duplicar datos
@@ -168,22 +166,45 @@ int main()
 	GLsizei lightIndexCount = sizeof(lightIndices) / sizeof(lightIndices[0]);
 
 	//Imagen de textura
-	const char* texture1 = "descarga.jpg"; //Asigna la ruta de la imagen de textura a la variable texture
+	 //Asigna la ruta de la imagen de textura a la variable texture
 
 	Shader shaderProgram("default.vert", "default.frag"); //Crea un objeto de la clase Shader llamado shaderProgram, que compila y enlaza los shaders "default.vert" y "default.frag"
-	std::vector<Vertex> verts(vertices, vertices + sizeof(vertices) / sizeof(Vertex)); //Crea un vector de vértices llamado verts, que se inicializa con los datos del arreglo vertices. El tamaño del vector se calcula dividiendo el tamaño total del arreglo por el tamaño de un float (ya que cada vértice tiene múltiples componentes)
-	std::vector<GLuint> ind(indices, indices + sizeof(indices) / sizeof(GLuint)); //Crea un vector de índices llamado ind, que se inicializa con los datos del arreglo indices. El tamaño del vector se calcula dividiendo el tamaño total del arreglo por el tamaño de un GLuint (ya que cada índice es un GLuint) el vector indices se define en Mesh.h
-	std::vector<Texture> tex(texture1, texture1 + sizeof(texture1) / sizeof(Texture)); //Crea un vector de texturas llamado tex, que se inicializa con los datos del arreglo textures. El tamaño del vector se calcula dividiendo el tamaño total del arreglo por el tamaño de un Texture (ya que cada textura es un objeto de la clase Texture) texture corresponde a la textura cargada en el main, se define como GLuint texture y se carga con la imagen "descarga.jpg"
+	//Crea un vector de vértices llamado verts, que se inicializa con los datos del arreglo vertices. El tamaño del vector se calcula dividiendo el tamaño total del arreglo por el tamaño de un float (ya que cada vértice tiene múltiples componentes)
+	std::vector<Vertex> verts;
+	float* v = cubitos.getVertices();
+	int total = cubitos.vertices.size() / 11; // 11 floats por vértice (3 pos + 3 color + 2 tex + 3 normal)
+	for (int i = 0; i < total; i++) {
+		Vertex vertex;
+		vertex.position = glm::vec3(v[i * 11 + 0], v[i * 11 + 1], v[i * 11 + 2]);
+		vertex.color = glm::vec3(v[i * 11 + 3], v[i * 11 + 4], v[i * 11 + 5]);
+		vertex.texCoords = glm::vec2(v[i * 11 + 6], v[i * 11 + 7]);
+		vertex.normal = glm::vec3(v[i * 11 + 8], v[i * 11 + 9], v[i * 11 + 10]);
+		verts.push_back(vertex);
+	}
+	
+	//Crea un vector de texturas llamado tex, que se inicializa con los datos del arreglo textures. El tamaño del vector se calcula dividiendo el tamaño total del arreglo por el tamaño de un Texture (ya que cada textura es un objeto de la clase Texture) texture corresponde a la textura cargada en el main, se define como GLuint texture y se carga con la imagen "descarga.jpg"
+	std::vector<Texture> tex = {
+	Texture("descarga.jpg", "diffuse", GL_TEXTURE0, GL_RGB, GL_UNSIGNED_BYTE)
+	};
 	Mesh floor(verts, ind, tex); //Crea un objeto de la clase Mesh llamado floor, que se inicializa con los vértices, índices y texturas definidos en los vectores verts, ind y tex respectivamente. Este objeto representa el piso de la escena
 
 	Shader lightShader("light.vert", "light.frag"); //Crea un objeto de la clase Shader llamado lightShader, que compila y enlaza los shaders "light.vert" y "light.frag"
-	std::vector<Vertex> lightVerts(lightVertices, lightVertices + sizeof(lightVertices) / sizeof(Vertex)); //Crea un vector de vértices llamado lightVerts, que se inicializa con los datos del arreglo lightVertices. El tamaño del vector se calcula dividiendo el tamaño total del arreglo por el tamaño de un float (ya que cada vértice tiene múltiples componentes)
+	//Crea un vector de vértices llamado lightVerts, que se inicializa con los datos del arreglo lightVertices. El tamaño del vector se calcula dividiendo el tamaño total del arreglo por el tamaño de un float (ya que cada vértice tiene múltiples componentes)
+	std::vector<Vertex> lightVerts;
+	for (int i = 0; i < 8; i++) {
+		Vertex vertex;
+		vertex.position = glm::vec3(lightVertices[i * 3 + 0], lightVertices[i * 3 + 1], lightVertices[i * 3 + 2]);
+		vertex.color = glm::vec3(1.0f, 1.0f, 1.0f);
+		vertex.texCoords = glm::vec2(0.0f, 0.0f);
+		vertex.normal = glm::vec3(0.0f, 1.0f, 0.0f);
+		lightVerts.push_back(vertex);
+	}
 	std::vector<GLuint> lightInd(lightIndices, lightIndices + sizeof(lightIndices) / sizeof(GLuint)); //Crea un vector de índices llamado lightInd, que se inicializa con los datos del arreglo lightIndices. El tamaño del vector se calcula dividiendo el tamaño total del arreglo por el tamaño de un GLuint (ya que cada índice es un GLuint)
 	Mesh light(lightVerts, lightInd, tex); //Crea un objeto de la clase Mesh llamado light, que se inicializa con los vértices y índices definidos en los vectores lightVerts y lightInd respectivamente, y un vector de texturas vacío. Este objeto representa la luz en la escena
 
 	// Configuración de la luz
 	glm::vec3 lightColor = glm::vec3(1.0f); //Define el color de la luz como blanco (RGBA)
-    glm::vec3 lightPos= glm::vec3(0.8f, 0.9f, 0.0f); //Define la posición de la luz en el espacio 3D (mover hacia la escena)
+    glm::vec3 lightPos= glm::vec3(0.8f, 1.0f, -0.6f); //Define la posición de la luz en el espacio 3D (mover hacia la escena)
 	glm::mat4 lightModel = glm::mat4(1.0f); //Crea una matriz de modelo para la luz, inicializada como la matriz identidad (sin transformaciones)
 	lightModel = glm::translate(lightModel, lightPos); //Aplica una traslación a la matriz de modelo para colocar la luz en la posición definida por lightPos
 
@@ -213,40 +234,7 @@ int main()
 	glUniform3f(glGetUniformLocation(shaderProgram.ID, "lightPos"), lightPos.x, lightPos.y, lightPos.z); //Sube la posición de la luz al shader de objetos
 
 	//Texturas
-    int widthImg, heightImg, numColCh;
-
-    // Flip vertically so texture coords match OpenGL convention (optional depending on image)
-    stbi_set_flip_vertically_on_load(true);
-    unsigned char* bytes = stbi_load("descarga.jpg", &widthImg, &heightImg, &numColCh, 0); //Carga la imagen "descarga.jpg"
-	if (!bytes) {
-		std::cout << "Failed to load texture 'descarga.jpg'\n";
-		glfwDestroyWindow(window);
-		glfwTerminate();
-		return -1;
-	}
-
-	GLuint texture;//Declara una variable GLuint llamada texture para almacenar el ID de la textura generada por OpenGL
-	glGenTextures(1, &texture); //Genera un ID para la textura
-	glActiveTexture(GL_TEXTURE0); //Activa la unidad de textura 0
-	glBindTexture(GL_TEXTURE_2D, texture); //Enlaza la textura como una textura 2D
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST); //Configura el modo de envoltura en S (horizontal) como repetición
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST); //Configura el modo de envoltura en T (vertical) como repetición
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); //Configura el modo de filtrado para reducción (minificación) como nearest (vecino más cercano). S significa la coordenada horizontal de la textura (x)
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT); //Configura el modo de filtrado para ampliación (magnificación) como nearest (vecino más cercano). T significa la coordenada vertical de la textura (y)
-
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, widthImg, heightImg, 0, GL_RGB, GL_UNSIGNED_BYTE, bytes); //Carga la imagen en la textura usando glTexImage2D. Especifica el formato de la imagen (RGB) y el tipo de datos (unsigned byte)
-	glGenerateMipmap(GL_TEXTURE_2D); //Genera mipmaps para la textura, lo que mejora la calidad visual al reducir la textura a tamaños más pequeños
-
-	
-	stbi_image_free(bytes); //Libera la memoria de la imagen cargada
-	glBindTexture(GL_TEXTURE_2D, 0); //Desenlaza la textura
-
-    GLuint tex0Uni = glGetUniformLocation(shaderProgram.ID, "tex0"); //Obtiene la ubicación del uniform "tex0" en el shader program
-	// Asegurar que el shader está activo antes de asignar el uniform
-	shaderProgram.Activate();
-	glUniform1i(tex0Uni, 0); //Asigna la unidad de textura 0 al sampler (usar glUniform1i)
+    
 
 	//Crea objeto Camera para manejar la vista y proyección
     Camera camera(800, 800, glm::vec3(0.0f, 0.0f, 3.0f)); //Crea un objeto de la clase Camera con la cámara más atrás para ver la escena
@@ -259,7 +247,7 @@ int main()
 		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		glBindTexture(GL_TEXTURE_2D, texture); //Enlaza la textura como una textura 2D
+		
 
 		camera.Inputs(window); //Llama al método Inputs del objeto camera para manejar la entrada del usuario (teclado y mouse) y actualizar la posición y orientación de la cámara en consecuencia
 		camera.updateMatrix(45.0f, 0.1f, 100.0f); //Llama al método Matrix del objeto camera para configurar las matrices de vista y proyección en el shader program usando el uniform "camMatrix"
@@ -274,7 +262,7 @@ int main()
 
 	//Para liberar recursos, se eliminan los objetos de OpenGL creados (VAO, VBO, shader program), se destruye la ventana creada y termina GLFW para liberar recursos
 	
-	glDeleteTextures(1, &texture);
+	
 	shaderProgram.Delete();
 	lightShader.Delete();
 
