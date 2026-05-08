@@ -138,19 +138,34 @@ int main()
 	//Crea objeto Camera para manejar la vista y proyección
     Camera camera(800, 800, glm::vec3(9.0f, 15.0f, -50.0f)); //Crea un objeto de la clase Camera con la cámara más atrás para ver la escena
 
-	Model model("models/sword/scene.gltf");
+	Model model("models/map/scene.gltf");
 
 	while(!glfwWindowShouldClose(window)) //Indica a la ventana que no debe cerrarse a menos de que otra funcion se lo indique
 	{
+
 		processInput(window);
 		// Renderizado: limpiar color del buffer cada frame
 		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		
+		static int currentModel = -1;//Variable estática para almacenar la tecla del modelo actualmente cargado, inicializada en -1 (ningún modelo cargado)
+		std::map<int, const char*> models = {
+			{GLFW_KEY_1, "models/bunny/scene.gltf"},
+			{GLFW_KEY_2, "models/grindstone/scene.gltf"},
+			{GLFW_KEY_3, "models/map/scene.gltf"},
+			{GLFW_KEY_4, "models/scroll/scene.gltf"},
+			{GLFW_KEY_5, "models/sword/scene.gltf"}
+		};//Mapa que asocia teclas (1-5) con rutas de modelos GLTF para cargar diferentes modelos al presionar las teclas correspondientes
+
+		for (auto& [tecla, modelPath] : models) {//Itera sobre el mapa de modelos, verificando si alguna de las teclas asociadas a los modelos está siendo presionada (auto& es una referencia a cada par clave-valor en el mapa)
+			if (glfwGetKey(window, tecla) == GLFW_PRESS && currentModel != tecla) { //Si la tecla está siendo presionada y no es el modelo actualmente cargado, se llama al método reload del objeto model para cargar el nuevo modelo desde la ruta especificada por modelPath, y se actualiza currentModel con la tecla del modelo recién cargado
+				model.reload(modelPath); 
+				currentModel = tecla;//Actualiza la variable currentModel con la tecla del modelo recién cargado. Evita cargar un modelo v
+			}
+		}
 
 		camera.Inputs(window); //Llama al método Inputs del objeto camera para manejar la entrada del usuario (teclado y mouse) y actualizar la posición y orientación de la cámara en consecuencia
-		camera.updateMatrix(70.0f, 0.1f, 100.0f); //Llama al método Matrix del objeto camera para configurar las matrices de vista y proyección en el shader program usando el uniform "camMatrix"
+		camera.updateMatrix(70.0f, 0.1f, 500.0f); //Llama al método Matrix del objeto camera para configurar las matrices de vista y proyección en el shader program usando el uniform "camMatrix"
 		
 		model.Draw(shaderProgram, camera); //Llama al método Draw del objeto model para renderizar el modelo 3D usando el shader program y la cámara configurada
 

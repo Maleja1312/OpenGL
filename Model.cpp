@@ -290,3 +290,22 @@ std::vector<glm::vec4> Model::groupFloatsVec4(std::vector<float> floatVec)
 		vectors.push_back(glm::vec4(floatVec[i++], floatVec[i++], floatVec[i++], floatVec[i++]));
 	return vectors;
 }
+
+void Model::reload(const char* newFile)
+{
+	// Limpiar datos anteriores
+	meshes.clear();
+	translationsMeshes.clear();
+	rotationsMeshes.clear();
+	scalesMeshes.clear();
+	matricesMeshes.clear();
+
+	// Cargar nuevo modelo
+	std::string text = get_file_contents(newFile);// Obtener el contenido del nuevo archivo
+	JSON = json::parse(text);// Actualizar el archivo y los datos
+
+	file = newFile;// Obtener los datos del nuevo modelo
+	data = getData();// Recorrer el nuevo modelo
+
+	traversNode(0);// Cargar el nuevo modelo
+}
