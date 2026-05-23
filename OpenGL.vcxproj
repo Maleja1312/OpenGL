@@ -76,7 +76,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>C:\Users\Usuario\source\repos\OpenGL\Libraries\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\Usuario\source\repos\OpenGL\Libraries\lib;$(LibraryPath)</LibraryPath>
+    <LibraryPath>"C:\Users\Usuario\source\repos\Maleja1312\OpenGL\Libraries\lib";$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

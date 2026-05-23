@@ -72,3 +72,36 @@ void Camera::Matrix(Shader& shader, const char* uniform)
 	// Exports camera matrix
 	glUniformMatrix4fv(glGetUniformLocation(shader.ID, uniform), 1, GL_FALSE, glm::value_ptr(cameraMatrix));
 }
+
+void Camera::startBezierPath(glm::vec3 p0, glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, float duration)
+{
+	bezierP0 = p0;
+	bezierP1 = p1;
+	bezierP2 = p2;
+	bezierP3 = p3;
+	bezierDuration = duration;
+	bezierTime = 0.0f;
+	followingPath = true;
+	Position = p0;
+}
+
+void Camera::updateBezierPath(float deltaTime)
+{
+	if (!followingPath) return;
+
+	bezierTime += deltaTime;
+	float t = bezierTime / bezierDuration;
+
+	if (t >= 1.0f)
+	{
+		followingPath = false;
+		t = 1.0f;
+	}
+
+	Position = calculateBezierPoint(t, bezierP0, bezierP1, bezierP2, bezierP3);
+
+	// Hacer que la cámara mire hacia el siguiente punto de la curva
+	float lookAheadT = std::min(t + 0.05f, 1.0f);
+	glm::vec3 lookAtPoint = calculateBezierPoint(lookAheadT, bezierP0, bezierP1, bezierP2, bezierP3);
+	Orientation = glm::normalize(lookAtPoint - Position);
+}
