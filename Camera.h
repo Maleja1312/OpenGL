@@ -11,6 +11,7 @@
 
 #include"shaderClass.h"
 
+
 inline glm::vec3 calculateBezierPoint(float t, glm::vec3 p0, glm::vec3 p1, glm::vec3 p2, glm::vec3 p3)
 {
 	float u = 1.0f - t;
@@ -19,6 +20,7 @@ inline glm::vec3 calculateBezierPoint(float t, glm::vec3 p0, glm::vec3 p1, glm::
 	float uuu = uu * u;
 	float ttt = tt * t;
 
+	// Fórmula de Bézier cúbica: B(t) = (1-t)^3 * P0 + 3(1-t)^2 * t * P1 + 3(1-t) * t^2 * P2 + t^3 * P3 
 	glm::vec3 p = uuu * p0;
 	p += 3.0f * uu * t * p1;
 	p += 3.0f * u * tt * p2;
